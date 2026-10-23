@@ -64,6 +64,9 @@ private:
 
 	const float moveSpeed_ = 0.20f;
 
+	//左右のどちらに移動していたかを記録する
+	float previousMoveDirection_ = 0.0f;
+
 	 // プレイヤーが生きているか
     bool isAlive_ = true;
 
