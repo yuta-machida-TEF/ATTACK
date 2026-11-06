@@ -28,9 +28,10 @@ public:
 	// 衝突判定
 	bool CheckCollision(const WorldTransform& platform, const Vector3& platformSize, const Vector3& previousPosition);
 
-	bool CheckEnemyCollision(const WorldTransform& enemy, const Vector3& enemySize, const Vector3& previousPosition, Enemy* enemyObject);
-
-	bool CheckEnemy2Collision(const WorldTransform& enemy2, const Vector3& enemySize, const Vector3& previousPosition, Enemy2* enemyObject2);
+	// Enemy・Enemy2共通の当たり判定
+	bool CheckEnemyCollision(const WorldTransform& enemyTransform, const Vector3& enemySize, 
+		                     const Vector3& previousPosition, Enemy* enemyObject, 
+		                     Enemy2* enemyObject2);
 
 	// ワールド変換を取得
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }

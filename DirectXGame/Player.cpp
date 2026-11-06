@@ -212,136 +212,29 @@ bool Player::CheckCollision(const KamataEngine::WorldTransform& platform, const 
 //============================================================
 //敵の当たり判定
 //============================================================
-bool Player::CheckEnemyCollision(const KamataEngine::WorldTransform& enemy, const KamataEngine::Vector3& enemySize, const KamataEngine::Vector3& previousPosition, Enemy* enemyObject) {
+
+//============================================================
+// Enemy・Enemy2共通の当たり判定
+//============================================================
+bool Player::CheckEnemyCollision(const WorldTransform& enemyTransform, const Vector3& enemySize, const Vector3& previousPosition, Enemy* enemyObject, Enemy2* enemyObject2) {
 
 	//============================================================
-	// 敵が倒されているなら当たり判定しない
+	// 敵が存在しない、または倒されている場合
 	//============================================================
 
-	if (enemyObject == nullptr) {
+	if (enemyObject == nullptr && enemyObject2 == nullptr) {
 		return false;
 	}
 
+	bool enemyAlive = false;
 
-	if (!enemyObject->IsAlive()) {
-		return false;
+	if (enemyObject != nullptr) {
+		enemyAlive = enemyObject->IsAlive();
+	} else {
+		enemyAlive = enemyObject2->IsAlive();
 	}
 
-
-	//============================================================
-	// Playerの大きさ
-	//============================================================
-
-	const float playerHalfWidth = 0.5f;
-	const float playerHalfHeight = 0.5f;
-	const float playerHalfDepth = 0.5f;
-
-	//============================================================
-	// Enemyの大きさ
-	//============================================================
-
-	const float enemyHalfWidth = enemySize.x / 2.0f;
-	const float enemyHalfHeight = enemySize.y / 2.0f;
-	const float enemyHalfDepth = enemySize.z / 2.0f;
-
-	//============================================================
-	// Playerの現在位置
-	//============================================================
-
-	const float playerX = worldTransform_.translation_.x;
-	const float playerY = worldTransform_.translation_.y;
-	const float playerZ = worldTransform_.translation_.z;
-
-	const float playerLeft = playerX - playerHalfWidth;
-	const float playerRight = playerX + playerHalfWidth;
-
-	const float playerBottom = playerY - playerHalfHeight;
-	const float playerTop = playerY + playerHalfHeight;
-
-	const float playerFront = playerZ - playerHalfDepth;
-	const float playerBack = playerZ + playerHalfDepth;
-
-	//============================================================
-	// Playerの前フレーム位置
-	//============================================================
-
-	const float previousBottom = previousPosition.y - playerHalfHeight;
-
-	//============================================================
-	// Enemyの範囲
-	//============================================================
-
-	const float enemyX = enemy.translation_.x;
-	const float enemyY = enemy.translation_.y;
-	const float enemyZ = enemy.translation_.z;
-
-	const float enemyLeft = enemyX - enemyHalfWidth;
-	const float enemyRight = enemyX + enemyHalfWidth;
-
-	const float enemyBottom = enemyY - enemyHalfHeight;
-	const float enemyTop = enemyY + enemyHalfHeight;
-
-	const float enemyFront = enemyZ - enemyHalfDepth;
-	const float enemyBack = enemyZ + enemyHalfDepth;
-
-	//============================================================
-	// X・Y・Zの重なり
-	//============================================================
-
-	const bool overlapX = playerRight > enemyLeft && playerLeft < enemyRight;
-
-	const bool overlapY = playerTop > enemyBottom && playerBottom < enemyTop;
-
-	const bool overlapZ = playerBack > enemyFront && playerFront < enemyBack;
-
-	//============================================================
-	// ① 敵の頭を踏んだ
-	//============================================================
-
-	if (overlapX && overlapZ && previousBottom >= enemyTop && playerBottom <= enemyTop && velocity_.y <= 0.0f) {
-
-		// Playerを敵の頭の上に移動
-		worldTransform_.translation_.y = enemyTop + playerHalfHeight;
-
-		// Playerを跳ねさせる
-		velocity_.y = jumpPower_;
-
-		// 敵を倒す
-		enemyObject->Kill();
-
-		//パーティクルを発生
-		
-
-		isGround_ = false;
-
-		return true;
-	}
-
-	//============================================================
-	// ② 横・下から敵に衝突
-	//============================================================
-
-	if (overlapX && overlapY && overlapZ) {
-
-		isAlive_ = false;
-
-		return true;
-	}
-
-	return false;
-}
-
-bool Player::CheckEnemy2Collision(const KamataEngine::WorldTransform& enemy2, const KamataEngine::Vector3& enemySize, const KamataEngine::Vector3& previousPosition, Enemy2* enemyObject2)
-{
-	//============================================================
-	// 敵が倒されているなら当たり判定しない
-	//============================================================
-
-	if (enemyObject2 == nullptr) {
-		return false;
-	}
-
-	if (!enemyObject2->IsAlive()) {
+	if (!enemyAlive) {
 		return false;
 	}
 
@@ -388,9 +281,9 @@ bool Player::CheckEnemy2Collision(const KamataEngine::WorldTransform& enemy2, co
 	// Enemyの範囲
 	//============================================================
 
-	const float enemyX = enemy2.translation_.x;
-	const float enemyY = enemy2.translation_.y;
-	const float enemyZ = enemy2.translation_.z;
+	const float enemyX = enemyTransform.translation_.x;
+	const float enemyY = enemyTransform.translation_.y;
+	const float enemyZ = enemyTransform.translation_.z;
 
 	const float enemyLeft = enemyX - enemyHalfWidth;
 	const float enemyRight = enemyX + enemyHalfWidth;
@@ -423,8 +316,12 @@ bool Player::CheckEnemy2Collision(const KamataEngine::WorldTransform& enemy2, co
 		// Playerを跳ねさせる
 		velocity_.y = jumpPower_;
 
-		// 敵を倒す
-		enemyObject2->Kill();
+		// 対象の敵を倒す
+		if (enemyObject != nullptr) {
+			enemyObject->Kill();
+		} else {
+			enemyObject2->Kill();
+		}
 
 		isGround_ = false;
 
@@ -444,7 +341,6 @@ bool Player::CheckEnemy2Collision(const KamataEngine::WorldTransform& enemy2, co
 
 	return false;
 }
-
 
 // ============================================================
 // 更新
@@ -537,7 +433,7 @@ void Player::Update(Stage* stage, Enemy* enemy,Enemy2* enemy2) {
 	{
 		CheckEnemyCollision(enemy->GetWorldTransform(),
 			                enemy->GetSize(), previousPosition,
-			                enemy);
+			                enemy,nullptr);
 	}
 
 	// ========================================================
@@ -546,7 +442,9 @@ void Player::Update(Stage* stage, Enemy* enemy,Enemy2* enemy2) {
 
 	if (enemy2 != nullptr && enemy2->IsAlive()) {
 
-		CheckEnemy2Collision(enemy2->GetWorldTransform(), enemy2->GetSize(), previousPosition, enemy2);
+		CheckEnemyCollision(enemy2->GetWorldTransform(),
+			                enemy2->GetSize(), previousPosition,
+			                nullptr,enemy2);
 	}
 
 

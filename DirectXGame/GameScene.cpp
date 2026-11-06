@@ -7,19 +7,27 @@ using namespace KamataEngine;
 
 // デストラクタ
 GameScene::~GameScene() {
-	delete player_;
-	delete modelPlayer_;
-	delete stage_;
-	delete modelBlock_;
-	delete modelEnemy_;
-	delete modelEnemy2_;
-	delete modelParticle_;
 
+	// オブジェクトの解放
+	delete player_;
+	delete enemy_;
+	delete enemy2_;
+	delete stage_;
+
+	// パーティクルの解放
 	for (Particle* particle : particles_) {
 		delete particle;
 	}
-}
 
+	particles_.clear();
+
+	// 3Dモデルの解放
+	delete modelPlayer_;
+	delete modelEnemy_;
+	delete modelEnemy2_;
+	delete modelBlock_;
+	delete modelParticle_;
+}
 // 初期化
 void GameScene::Initialize() 
 {
