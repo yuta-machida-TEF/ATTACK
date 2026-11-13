@@ -1,10 +1,9 @@
-
 #pragma once
 
-#include "Particle.h"
+#include"EnemyBase.h"
 #include "Stage.h"
 #include <KamataEngine.h>
-#include <numbers>
+
 
 using namespace KamataEngine;
 
@@ -20,7 +19,9 @@ public:
 	void Initialize(Model* model);
 
 	// 更新
-	void Update(Stage* stage, Enemy* enemy, Enemy2* enemy2);
+	void Update(Stage* stage,
+		        EnemyBase* enemy,
+		        EnemyBase* enemy2);
 
 	// 描画
 	void Draw(Camera& camera);
@@ -29,9 +30,11 @@ public:
 	bool CheckCollision(const WorldTransform& platform, const Vector3& platformSize, const Vector3& previousPosition);
 
 	// Enemy・Enemy2共通の当たり判定
-	bool CheckEnemyCollision(const WorldTransform& enemyTransform, const Vector3& enemySize, 
-		                     const Vector3& previousPosition, Enemy* enemyObject, 
-		                     Enemy2* enemyObject2);
+	bool CheckEnemyCollision(
+		                     const WorldTransform& enemyTransform,
+		                     const Vector3& enemySize, 
+		                     const Vector3& previousPosition,
+		                     EnemyBase* enemyObject);
 
 	// ワールド変換を取得
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
@@ -43,12 +46,6 @@ private:
 
 	// モデル
 	Model* model_ = nullptr;
-
-	// パーティクル3Dモデルデータ
-	Model* modelParticle_ = nullptr;
-
-	// パーティクル
-	std::list<Particle*> particles_;
 
 	// 落下速度
 	Vector2 velocity_ = {0.0f, 0.0f};

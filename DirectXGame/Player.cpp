@@ -1,26 +1,16 @@
 #include "Player.h"
-#include"Enemy.h"
-#include"Enemy2.h"
+#include"EnemyBase.h"
+
 #include <math/MathUtility.h>
-#include<random>
-
-std::random_device seedGenerator;
-std::mt19937 randomEngine(seedGenerator());
-std::uniform_real_distribution<float> distribution(-0.3f, 0.3f);
-
+#include<numbers>
 
 using namespace KamataEngine;
 using namespace MathUtility;
 
+//GameScene側でパーティクルの生成と描画、削除を管理している
 Player::~Player()
 {
-	// 3Dモデルデータの解放
-	delete modelParticle_;
-	for (Particle* particle : particles_) {
-		// パーティクルの解放
-		delete particle;
-	}
-	particles_.clear();
+	
 }
 
 // 初期化
@@ -35,8 +25,6 @@ void Player::Initialize(Model* model) {
 
 	worldTransform_.translation_ = {-12.0f, -6.5f, 0.0f};
 
-	// 3Dモデルデータの生成
-	modelParticle_ = Model::CreateSphere(4, 4);
 }
 
 // ============================================================
@@ -216,13 +204,17 @@ bool Player::CheckCollision(const KamataEngine::WorldTransform& platform, const 
 //============================================================
 // Enemy・Enemy2共通の当たり判定
 //============================================================
-bool Player::CheckEnemyCollision(const WorldTransform& enemyTransform, const Vector3& enemySize, const Vector3& previousPosition, Enemy* enemyObject, Enemy2* enemyObject2) {
+bool Player::CheckEnemyCollision(
+	const WorldTransform& enemyTransform,
+	const Vector3& enemySize,
+	const Vector3& previousPosition,
+	EnemyBase* enemyObject) {
 
 	//============================================================
 	// 敵が存在しない、または倒されている場合
 	//============================================================
 
-	if (enemyObject == nullptr && enemyObject2 == nullptr) {
+	if (enemyObject == nullptr || !enemyObject->IsAlive()) {
 		return false;
 	}
 
@@ -231,7 +223,7 @@ bool Player::CheckEnemyCollision(const WorldTransform& enemyTransform, const Vec
 	if (enemyObject != nullptr) {
 		enemyAlive = enemyObject->IsAlive();
 	} else {
-		enemyAlive = enemyObject2->IsAlive();
+		enemyAlive = enemyObject->IsAlive();
 	}
 
 	if (!enemyAlive) {
@@ -317,11 +309,8 @@ bool Player::CheckEnemyCollision(const WorldTransform& enemyTransform, const Vec
 		velocity_.y = jumpPower_;
 
 		// 対象の敵を倒す
-		if (enemyObject != nullptr) {
-			enemyObject->Kill();
-		} else {
-			enemyObject2->Kill();
-		}
+	    enemyObject->Kill();
+		
 
 		isGround_ = false;
 
@@ -346,7 +335,10 @@ bool Player::CheckEnemyCollision(const WorldTransform& enemyTransform, const Vec
 // 更新
 // ============================================================
 
-void Player::Update(Stage* stage, Enemy* enemy,Enemy2* enemy2) {
+void Player::Update(
+	Stage* stage,
+	EnemyBase* enemy,
+	EnemyBase* enemy2) {
 
 	// ========================================================
 	// ① 前フレームの位置を保存
@@ -432,8 +424,9 @@ void Player::Update(Stage* stage, Enemy* enemy,Enemy2* enemy2) {
 	if (enemy != nullptr && enemy->IsAlive()) 
 	{
 		CheckEnemyCollision(enemy->GetWorldTransform(),
-			                enemy->GetSize(), previousPosition,
-			                enemy,nullptr);
+			                enemy->GetSize(),
+			                previousPosition,
+			                enemy);
 	}
 
 	// ========================================================
@@ -443,8 +436,9 @@ void Player::Update(Stage* stage, Enemy* enemy,Enemy2* enemy2) {
 	if (enemy2 != nullptr && enemy2->IsAlive()) {
 
 		CheckEnemyCollision(enemy2->GetWorldTransform(),
-			                enemy2->GetSize(), previousPosition,
-			                nullptr,enemy2);
+			                enemy2->GetSize(),
+			                previousPosition,
+			                enemy2);
 	}
 
 

@@ -120,7 +120,7 @@ void GameScene::Update() {
 	    std::remove_if(
 	        particles_.begin(), particles_.end(),
 	        [](Particle* particle) {
-		        if (particle->IFinished()) {
+		        if (particle->IsFinished()) {
 
 			        delete particle;
 
