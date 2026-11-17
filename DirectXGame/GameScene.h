@@ -52,6 +52,11 @@ private:
 
 	Camera camera_;
 
+	Camera camera2_; // 追従カメラ
+
+	// false : 既存カメラ、true : 追従カメラ
+	bool isCamera2_ = false;
+
 	// =========================
 	// 内部処理用の変数
 	// =========================

@@ -47,6 +47,10 @@ void GameScene::Initialize()
 	camera_.translation_ = {0, 0, -20};
 	camera_.Initialize();
 
+	// 追従カメラの初期化
+	camera2_.translation_ = {0.0f, 5.0f, -20.0f};
+	camera2_.Initialize();
+
 	player_ = new Player();
 	player_->Initialize(modelPlayer_);
 
@@ -69,8 +73,35 @@ void GameScene::Initialize()
 // 更新
 void GameScene::Update() {
 
+	 Input* input = Input::GetInstance();
+
+	// Cキーを押した瞬間に切り替える
+	if (input->TriggerKey(DIK_C)) {
+		isCamera2_ = !isCamera2_;
+	}
+
 	// プレイヤー更新
 	player_->Update(stage_, enemy_, enemy2_);
+
+	// 追従カメラを更新
+	if (isCamera2_) {
+
+		// プレイヤーの現在位置を取得
+		const Vector3& playerPosition = player_->GetWorldTransform().translation_;
+
+		// カメラがプレイヤーを追いかける位置
+		const float followSpeed = 0.1f;
+
+		camera2_.translation_.x += (playerPosition.x - camera2_.translation_.x) * followSpeed;
+
+		camera2_.translation_.y += (playerPosition.y - camera2_.translation_.y) * followSpeed;
+
+		// Z座標は固定して、前後の距離を維持
+		camera2_.translation_.z = -20.0f;
+	}
+
+	// カメラの行列を更新
+	camera2_.UpdateMatrix();
 
 	//========================================
 	// 敵1が倒された瞬間
@@ -176,18 +207,21 @@ void GameScene::Draw() {
 	// 3Dモデル描画前処理
 	Model::PreDraw();
 
+	// 使用するカメラを選択
+	Camera& activeCamera = isCamera2_ ? camera2_ : camera_;
+
 	//オブジェクトを共通の型で描画
 	for (GameObject* object : gameObjects_) {
 	
-		object->Draw(camera_);
+		object->Draw(activeCamera);
 	}
 
 	// ステージ
-	stage_->Draw(camera_);
+	stage_->Draw(activeCamera);
 
 	// パーティクル
 	for (Particle* particle : particles_) {
-		particle->Draw(camera_);
+		particle->Draw(activeCamera);
 	}
 
 	// 3Dモデル描画後処理

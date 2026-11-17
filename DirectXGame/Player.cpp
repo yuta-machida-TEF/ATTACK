@@ -4,6 +4,9 @@
 #include <math/MathUtility.h>
 #include<numbers>
 
+#include"PlayerStates.h"
+#include<memory>
+
 using namespace KamataEngine;
 using namespace MathUtility;
 
@@ -23,8 +26,19 @@ void Player::Initialize(Model* model) {
 	// 初期回転
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
 
-	worldTransform_.translation_ = {-12.0f, -6.5f, 0.0f};
+	//std::unique_ptrは自動でメモリを解放する
+	//注意点は、同じオブジェクトを複数を所有することができない
+	ChangeState(std::make_unique<PlayerIdleState>());
 
+}
+
+void Player::ChangeState(std::unique_ptr<PlayerState> newState) {
+
+	state_ = std::move(newState);
+
+	if (state_) {
+		state_->Enter(*this);
+	}
 }
 
 // ============================================================
@@ -197,6 +211,33 @@ bool Player::CheckCollision(const KamataEngine::WorldTransform& platform, const 
 }
 
 
+void Player::Move() {
+
+	auto* input = Input::GetInstance();
+
+	float direction = 0.0f;
+
+	if (input->PushKey(DIK_RIGHT)) {
+		direction = 1.0f;
+	}
+
+	if (input->PushKey(DIK_LEFT)) {
+		direction = -1.0f;
+	}
+
+	if (direction != 0.0f) {
+
+		worldTransform_.translation_.x += moveSpeed_ * direction;
+
+		if (direction != previousMoveDirection_) {
+
+			worldTransform_.rotation_.y = direction > 0.0f ? std::numbers::pi_v<float> / 2.0f : -std::numbers::pi_v<float> / 2.0f;
+		}
+
+		previousMoveDirection_ = direction;
+	}
+}
+
 //============================================================
 //敵の当たり判定
 //============================================================
@@ -210,26 +251,7 @@ bool Player::CheckEnemyCollision(
 	const Vector3& previousPosition,
 	EnemyBase* enemyObject) {
 
-	//============================================================
-	// 敵が存在しない、または倒されている場合
-	//============================================================
-
-	if (enemyObject == nullptr || !enemyObject->IsAlive()) {
-		return false;
-	}
-
-	bool enemyAlive = false;
-
-	if (enemyObject != nullptr) {
-		enemyAlive = enemyObject->IsAlive();
-	} else {
-		enemyAlive = enemyObject->IsAlive();
-	}
-
-	if (!enemyAlive) {
-		return false;
-	}
-
+	
 	//============================================================
 	// Playerの大きさ
 	//============================================================
@@ -314,6 +336,8 @@ bool Player::CheckEnemyCollision(
 
 		isGround_ = false;
 
+		ChangeState(std::make_unique<PlayerJumpState>());
+
 		return true;
 	}
 
@@ -325,6 +349,8 @@ bool Player::CheckEnemyCollision(
 
 		isAlive_ = false;
 
+		ChangeState(std::make_unique<PlayerDeadState>());
+
 		return true;
 	}
 
@@ -335,130 +361,57 @@ bool Player::CheckEnemyCollision(
 // 更新
 // ============================================================
 
-void Player::Update(
-	Stage* stage,
-	EnemyBase* enemy,
-	EnemyBase* enemy2) {
 
-	// ========================================================
+void Player::Update(Stage* stage, EnemyBase* enemy, EnemyBase* enemy2) {
+
 	// ① 前フレームの位置を保存
-	// ========================================================
-
 	const Vector3 previousPosition = worldTransform_.translation_;
 
-	// ========================================================
-	// ② 接地状態を解除
-	// ========================================================
+	// ② 死亡していたら更新しない
+	if (!isAlive_) {
+		return;
+	}
 
+	// ③ Stateを更新
+	if (state_) {
+		state_->Update(*this);
+	}
+
+	// ④ 接地状態を解除
 	isGround_ = false;
 
-
-	// ========================================================
-	// ③ 左右移動・旋回
-	// ========================================================
-
-	    // 移動方向
-	    float moveDirection = 0.0f;
-
-	if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
-		worldTransform_.translation_.x += moveSpeed_;
-		moveDirection = 1.0f;
-	}
-
-	if (Input::GetInstance()->PushKey(DIK_LEFT)) {
-		worldTransform_.translation_.x -= moveSpeed_;
-		moveDirection = -1.0f;
-	}
-
-	// 移動方向が変わったらプレイヤーの向きを変更する
-	if (moveDirection != 0.0f && moveDirection != previousMoveDirection_) {
-
-		if (moveDirection > 0.0f) {
-			// 右を向く
-			worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
-		} else {
-			// 左を向く
-			worldTransform_.rotation_.y = -std::numbers::pi_v<float> / 2.0f;
-		}
-	}
-
-	// 移動している場合だけ、方向を記録する
-	if (moveDirection != 0.0f) {
-		previousMoveDirection_ = moveDirection;
-	}
-	
-
-	// ========================================================
-	// ④ ジャンプ入力だけ取得
-	// ========================================================
-
-	const bool jump = Input::GetInstance()->TriggerKey(DIK_UP);
-
-	// ========================================================
 	// ⑤ 重力
-	// ========================================================
-
 	velocity_.y += gravity_;
 
 	worldTransform_.translation_.y += velocity_.y;
 
-	// ========================================================
-	// ⑥ 全足場との当たり判定
-	// ========================================================
-
+	// ⑥ 足場との当たり判定
 	for (int y = 0; y < Stage::kMapHeight; y++) {
 		for (int x = 0; x < Stage::kMapWidth; x++) {
 
 			if (stage->GetMapData(y, x) == 1) {
 
-				CheckCollision(stage->GetWorldTransform(y, x),
-					stage->GetPlatformSize(), previousPosition);
+				CheckCollision(stage->GetWorldTransform(y, x), stage->GetPlatformSize(), previousPosition);
 			}
 		}
 	}
 
-	// ========================================================
 	// ⑦ 敵との当たり判定
-	// ========================================================
+	if (enemy != nullptr && enemy->IsAlive()) {
 
-	if (enemy != nullptr && enemy->IsAlive()) 
-	{
-		CheckEnemyCollision(enemy->GetWorldTransform(),
-			                enemy->GetSize(),
-			                previousPosition,
-			                enemy);
+		CheckEnemyCollision(enemy->GetWorldTransform(), enemy->GetSize(), previousPosition, enemy);
 	}
 
-	// ========================================================
-	// Enemy2との当たり判定
-	// ========================================================
-
+	// ⑧ Enemy2との当たり判定
 	if (enemy2 != nullptr && enemy2->IsAlive()) {
 
-		CheckEnemyCollision(enemy2->GetWorldTransform(),
-			                enemy2->GetSize(),
-			                previousPosition,
-			                enemy2);
+		CheckEnemyCollision(enemy2->GetWorldTransform(), enemy2->GetSize(), previousPosition, enemy2);
 	}
 
-
-	// ========================================================
-	// ⑦ ジャンプ
-	// ========================================================
-
-	if (jump && isGround_) {
-
-		velocity_.y = jumpPower_;
-
-		isGround_ = false;
-	}
-
-	// ========================================================
-	// ⑧ ワールド行列更新
-	// ========================================================
-
+	// ⑨ ワールド行列更新
 	worldTransform_.UpdateMatrix();
 }
+
 
 // ============================================================
 // 描画
