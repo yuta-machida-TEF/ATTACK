@@ -40,8 +40,8 @@ void GameScene::Initialize()
 
 	// パーティクル用モデル
 	modelParticle_ = Model::CreateFromOBJ("deathParticle");
-
 	assert(modelParticle_);
+
 
 	// カメラの初期化
 	camera_.translation_ = {0, 0, -20};
@@ -58,6 +58,12 @@ void GameScene::Initialize()
 
 	stage_ = new Stage();
 	stage_->Initialize(modelBlock_);
+
+    // ポリモーフィズムによるオブジェクト管理
+	gameObjects_.push_back(player_);
+	gameObjects_.push_back(enemy_);
+	gameObjects_.push_back(enemy2_);
+
 }
 
 // 更新
@@ -170,12 +176,11 @@ void GameScene::Draw() {
 	// 3Dモデル描画前処理
 	Model::PreDraw();
 
-	// プレイヤー
-	player_->Draw(camera_);
-
-	// 敵
-	enemy_->Draw(camera_);
-	enemy2_->Draw(camera_);
+	//オブジェクトを共通の型で描画
+	for (GameObject* object : gameObjects_) {
+	
+		object->Draw(camera_);
+	}
 
 	// ステージ
 	stage_->Draw(camera_);

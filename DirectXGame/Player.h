@@ -1,5 +1,6 @@
 #pragma once
 
+#include"GameObject.h"
 #include"EnemyBase.h"
 #include "Stage.h"
 #include <KamataEngine.h>
@@ -10,7 +11,7 @@ using namespace KamataEngine;
 class Enemy;
 class Enemy2;
 
-class Player {
+class Player : public GameObject{
 public:
 	// デストラクタ
 	~Player();
@@ -24,7 +25,7 @@ public:
 		        EnemyBase* enemy2);
 
 	// 描画
-	void Draw(Camera& camera);
+	void Draw(Camera& camera) override;
 
 	// 衝突判定
 	bool CheckCollision(const WorldTransform& platform, const Vector3& platformSize, const Vector3& previousPosition);
@@ -37,7 +38,7 @@ public:
 		                     EnemyBase* enemyObject);
 
 	// ワールド変換を取得
-	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
+	const WorldTransform& GetWorldTransform() const override{ return worldTransform_; }
 
 private:
 	// =========================

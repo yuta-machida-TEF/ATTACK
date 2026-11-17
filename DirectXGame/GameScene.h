@@ -4,6 +4,7 @@
 #include "Particle.h"
 #include "Player.h"
 #include "Stage.h"
+#include"GameObject.h"
 
 #include <KamataEngine.h>
 #include <vector>
@@ -67,6 +68,8 @@ private:
 	// =========================
 
 	std::vector<Particle*> particles_;
+	//ポリモーフィズムで管理するオブジェクト
+	std::vector<GameObject*> gameObjects_;
 
 	// =========================
 	// 内部処理用関数

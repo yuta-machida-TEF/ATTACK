@@ -1,9 +1,9 @@
-
 #pragma once
 
+#include"GameObject.h"
 #include <KamataEngine.h>
 
-class EnemyBase {
+class EnemyBase : public GameObject {
 public:
 	virtual ~EnemyBase() = default;
 
