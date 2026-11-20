@@ -20,9 +20,7 @@ public:
 	void Initialize(Model* model);
 
 	// 更新
-	void Update(Stage* stage,
-		        EnemyBase* enemy,
-		        EnemyBase* enemy2);
+	void Update(Stage* stage, const std::vector<EnemyBase*>& enemies);
 
 	// 描画
 	void Draw(Camera& camera) override;

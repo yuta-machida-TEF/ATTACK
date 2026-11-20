@@ -335,10 +335,7 @@ bool Player::CheckEnemyCollision(
 // 更新
 // ============================================================
 
-void Player::Update(
-	Stage* stage,
-	EnemyBase* enemy,
-	EnemyBase* enemy2) {
+void Player::Update(Stage* stage, const std::vector<EnemyBase*>& enemies) {
 
 	// ========================================================
 	// ① 前フレームの位置を保存
@@ -417,28 +414,27 @@ void Player::Update(
 		}
 	}
 
-	// ========================================================
-	// ⑦ 敵との当たり判定
-	// ========================================================
+	for (EnemyBase* enemy :enemies) {
 
-	if (enemy != nullptr && enemy->IsAlive()) 
-	{
-		CheckEnemyCollision(enemy->GetWorldTransform(),
-			                enemy->GetSize(),
-			                previousPosition,
-			                enemy);
-	}
+		if (enemy == nullptr || !enemy->IsAlive()) {
+			continue;
+		}
 
-	// ========================================================
-	// Enemy2との当たり判定
-	// ========================================================
+		// ========================================================
+		// ⑦ 敵との当たり判定
+		// ========================================================
+		if (enemy != nullptr && enemy->IsAlive()) {
+			CheckEnemyCollision(enemy->GetWorldTransform(), enemy->GetSize(), previousPosition, enemy);
+		}
 
-	if (enemy2 != nullptr && enemy2->IsAlive()) {
+		// ========================================================
+		// Enemy2との当たり判定
+		// ========================================================
 
-		CheckEnemyCollision(enemy2->GetWorldTransform(),
-			                enemy2->GetSize(),
-			                previousPosition,
-			                enemy2);
+		if (enemy != nullptr && enemy->IsAlive()) {
+
+			CheckEnemyCollision(enemy->GetWorldTransform(), enemy->GetSize(), previousPosition, enemy);
+		}
 	}
 
 

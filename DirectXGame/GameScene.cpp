@@ -14,6 +14,9 @@ GameScene::~GameScene() {
 	delete enemy2_;
 	delete stage_;
 
+	enemies_.clear();
+	gameObjects_.clear();
+
 	// パーティクルの解放
 	for (Particle* particle : particles_) {
 		delete particle;
@@ -50,14 +53,18 @@ void GameScene::Initialize()
 	player_ = new Player();
 	player_->Initialize(modelPlayer_);
 
-	enemy_ = new Enemy();
-	enemy_->Initialize(modelEnemy_);
+	enemy_ = new EnemyBase();
+	enemy_->Initialize(modelEnemy_, {10.0f,-3.0f,0.0f});
 
-	enemy2_ = new Enemy2();
-	enemy2_->Initialize(modelEnemy2_);
+	enemy2_ = new EnemyBase();
+	enemy2_->Initialize(modelEnemy2_,{5.0f,-3.0f,0.0f});
 
 	stage_ = new Stage();
 	stage_->Initialize(modelBlock_);
+
+	// 敵を配列に登録
+	enemies_.push_back(enemy_);
+	enemies_.push_back(enemy2_);
 
     // ポリモーフィズムによるオブジェクト管理
 	gameObjects_.push_back(player_);
@@ -106,10 +113,11 @@ void GameScene::Update() {
 
 	stage_->Update();
 
-	enemy_->Update();
-
-	enemy2_->Update();
-
+	for (EnemyBase* enemy : enemies_) {
+		if (enemy != nullptr && enemy->IsAlive()) {
+			enemy->Update();
+		}
+	}
 	//========================================
 	// パーティクル更新
 	//========================================

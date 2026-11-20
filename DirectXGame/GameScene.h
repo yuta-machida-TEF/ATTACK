@@ -41,10 +41,17 @@ private:
 	// =========================
 
 	Player* player_ = nullptr;
-	Enemy* enemy_ = nullptr;
-	Enemy2* enemy2_ = nullptr;
+	EnemyBase* enemy_ = nullptr;
+	EnemyBase* enemy2_ = nullptr;
 	Stage* stage_ = nullptr;
 	Particle* particle_ = nullptr;
+
+	 // 敵をまとめて管理する配列
+	std::vector<EnemyBase*> enemies_;
+
+	// 描画するオブジェクトをまとめる
+	// ポリモーフィズムで管理するオブジェクト
+	std::vector<GameObject*> gameObjects_;
 
 	// =========================
 	// カメラ
@@ -68,8 +75,7 @@ private:
 	// =========================
 
 	std::vector<Particle*> particles_;
-	//ポリモーフィズムで管理するオブジェクト
-	std::vector<GameObject*> gameObjects_;
+	
 
 	// =========================
 	// 内部処理用関数
