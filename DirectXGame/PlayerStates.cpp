@@ -21,13 +21,13 @@ static void MovePlayer(Player& player) {
 	if (direction != 0.0f) {
 
 		player.worldTransform_.translation_.x += player.moveSpeed_ * direction;
-
+		
 		// 向きを変更
 		if (direction != player.previousMoveDirection_) {
-
+		
 			player.worldTransform_.rotation_.y = direction > 0.0f ? std::numbers::pi_v<float> / 2.0f : -std::numbers::pi_v<float> / 2.0f;
 		}
-
+		
 		player.previousMoveDirection_ = direction;
 	}
 }
