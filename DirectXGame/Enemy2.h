@@ -10,4 +10,6 @@ public:
 
 	void Update() override;
 
+	void Draw(KamataEngine::Camera& camera) override;
+
 };

@@ -53,10 +53,14 @@ void GameScene::Initialize()
 	player_ = new Player();
 	player_->Initialize(modelPlayer_);
 
-	enemy_ = new EnemyBase();
+
+	//イメージとしては、
+	//クラス：設計図
+	// インスタンス：設計図をもとに作った実体 という関係です。
+	enemy_ = new Enemy();
 	enemy_->Initialize(modelEnemy_, {10.0f,-3.0f,0.0f});
 
-	enemy2_ = new EnemyBase();
+	enemy2_ = new Enemy2();
 	enemy2_->Initialize(modelEnemy2_,{5.0f,-3.0f,0.0f});
 
 	stage_ = new Stage();
@@ -77,7 +81,7 @@ void GameScene::Initialize()
 void GameScene::Update() {
 
 	// プレイヤー更新
-	player_->Update(stage_, enemy_, enemy2_);
+	player_->Update(stage_,enemies_);
 
 	//========================================
 	// 敵1が倒された瞬間

@@ -220,11 +220,10 @@ bool Player::CheckEnemyCollision(
 
 	bool enemyAlive = false;
 
-	if (enemyObject != nullptr) {
+	if (enemyObject != nullptr) 
+	{
 		enemyAlive = enemyObject->IsAlive();
-	} else {
-		enemyAlive = enemyObject->IsAlive();
-	}
+	} 
 
 	if (!enemyAlive) {
 		return false;

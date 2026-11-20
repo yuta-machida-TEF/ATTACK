@@ -7,7 +7,21 @@ void Enemy::Initialize(KamataEngine::Model* model,
 
 void Enemy::Update() {
 
-	// Enemy独自の移動処理
+	if (!isAlive_) {
+		return;
+	}
+	
+	//EnemyBaseに共通する更新処理
+	EnemyBase::Update();
+
+	// Enemy独自の移動処理をここに追加する
 
 	worldTransform_.UpdateMatrix();
+}
+
+void Enemy::Draw(KamataEngine::Camera& camera) 
+{
+	if (isAlive_) {
+		model_->Draw(worldTransform_, camera);
+	}
 }

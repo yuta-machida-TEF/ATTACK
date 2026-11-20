@@ -23,7 +23,7 @@ public:
 	void Update(Stage* stage, const std::vector<EnemyBase*>& enemies);
 
 	// 描画
-	void Draw(Camera& camera) override;
+	void Draw(KamataEngine::Camera& camera) override;
 
 	// 衝突判定
 	bool CheckCollision(const WorldTransform& platform, const Vector3& platformSize, const Vector3& previousPosition);
