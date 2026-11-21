@@ -1,27 +1,48 @@
-
 #include "Enemy.h"
 
-void Enemy::Initialize(KamataEngine::Model* model,
-	                   KamataEngine::Vector3 position) 
-{ EnemyBase::Initialize(model, position); }
+using namespace KamataEngine;
+
+void Enemy::Initialize(Model* model, Vector3 position) {
+
+	// 基底クラスの初期化を利用
+	EnemyBase::Initialize(model, position);
+
+	velocityY_ = 0.0f;
+	jumpTimer_ = 0.0f;
+}
 
 void Enemy::Update() {
 
-	if (!isAlive_) {
-		return;
-	}
-	
-	//EnemyBaseに共通する更新処理
-	EnemyBase::Update();
+	// ジャンプするまでの時間
+	jumpTimer_ += 1.0f / 60.0f;
 
-	// Enemy独自の移動処理をここに追加する
+	// 接地していて、一定時間経過したらジャンプ
+	if (isGround_ && jumpTimer_ >= 1.0f) {
+
+		velocityY_ = jumpPower_;
+
+		isGround_ = false;
+
+		jumpTimer_ = 0.0f;
+	}
+
+	// 重力
+	velocityY_ += gravity_;
+
+	// Y座標を更新
+	worldTransform_.translation_.y += velocityY_;
+
+	// 地面判定
+	if (worldTransform_.translation_.y <= groundY_) {
+
+		worldTransform_.translation_.y = groundY_;
+
+		velocityY_ = 0.0f;
+
+		isGround_ = true;
+	}
 
 	worldTransform_.UpdateMatrix();
 }
 
-void Enemy::Draw(KamataEngine::Camera& camera) 
-{
-	if (isAlive_) {
-		model_->Draw(worldTransform_, camera);
-	}
-}
+void Enemy::Draw(Camera& camera) { EnemyBase::Draw(camera); }

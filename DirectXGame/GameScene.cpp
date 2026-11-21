@@ -10,10 +10,14 @@ GameScene::~GameScene() {
 
 	// オブジェクトの解放
 	delete player_;
-	delete enemy_;
-	delete enemy2_;
 	delete stage_;
 
+	// 敵のメモリ解放
+	for (EnemyBase* enemy : enemies_) {
+		delete enemy;
+	}
+
+	//enemiesだけでは、、敵のインスタンスのメモリが解放されません。
 	enemies_.clear();
 	gameObjects_.clear();
 
@@ -53,27 +57,44 @@ void GameScene::Initialize()
 	player_ = new Player();
 	player_->Initialize(modelPlayer_);
 
+	// イメージとしては、
+	// クラス：設計図
+	// ポリモーフィズムを使って敵を一括管理する
+	//================================
+	//Enemy
+	//================================
+	//push_backのメンバ関数の役割は、配列の最後に要素を追加する。
+	enemies_.push_back(new Enemy());
 
-	//イメージとしては、
-	//クラス：設計図
-	// インスタンス：設計図をもとに作った実体 という関係です。
-	enemy_ = new Enemy();
-	enemy_->Initialize(modelEnemy_, {10.0f,-3.0f,0.0f});
+    //backのメンバ関数の役割は、配列の最後にある要素を取得する。
+	enemies_.back()->Initialize(
+		modelEnemy_, 
+	    {10.0f, -3.0f, 0.0f}
+	);
 
-	enemy2_ = new Enemy2();
-	enemy2_->Initialize(modelEnemy2_,{5.0f,-3.0f,0.0f});
+	//======================
+	// Enemy2
+	//======================
+	enemies_.push_back(new Enemy2());
 
+	enemies_.back()->Initialize(
+		modelEnemy2_,
+		{5.0f, -3.0f, 0.0f}
+	);
+
+
+	for (EnemyBase* enemy : enemies_) {
+		previousEnemyAlive_.push_back(enemy->IsAlive());
+	}
+
+	//===============
+	//ステージ
+	//===============
 	stage_ = new Stage();
 	stage_->Initialize(modelBlock_);
 
-	// 敵を配列に登録
-	enemies_.push_back(enemy_);
-	enemies_.push_back(enemy2_);
-
     // ポリモーフィズムによるオブジェクト管理
 	gameObjects_.push_back(player_);
-	gameObjects_.push_back(enemy_);
-	gameObjects_.push_back(enemy2_);
 
 }
 
@@ -83,33 +104,33 @@ void GameScene::Update() {
 	// プレイヤー更新
 	player_->Update(stage_,enemies_);
 
-	//========================================
-	// 敵1が倒された瞬間
-	//========================================
+	//====================
+	// 敵の更新・死亡判定
+	//====================
+	for (size_t i = 0; i < enemies_.size(); i++) {
 
-	if (enemyWasAlive_ && !enemy_->IsAlive()) {
+		EnemyBase* enemy = enemies_[i];
 
-		Vector3 position = enemy_->GetWorldTransform().translation_;
+		if (enemy == nullptr) {
+			continue;
+		}
 
-		CreateParticles(position);
+		// 敵の更新
+		if (enemy->IsAlive()) {
+			enemy->Update();
+		}
+
+		// 敵が倒された瞬間
+		if (previousEnemyAlive_[i] && !enemy->IsAlive()) {
+
+			Vector3 position = enemy->GetWorldTransform().translation_;
+
+			CreateParticles(position);
+		}
+
+		// 生存状態を保存
+		previousEnemyAlive_[i] = enemy->IsAlive();
 	}
-
-	// 現在の敵1の生存状態を保存
-	enemyWasAlive_ = enemy_->IsAlive();
-
-	//========================================
-	// 敵2が倒された瞬間
-	//========================================
-
-	if (enemy2WasAlive_ && !enemy2_->IsAlive()) {
-
-		Vector3 position = enemy2_->GetWorldTransform().translation_;
-
-		CreateParticles(position);
-	}
-
-	// 現在の敵2の生存状態を保存
-	enemy2WasAlive_ = enemy2_->IsAlive();
 
 	//========================================
 	// その他の更新
@@ -117,11 +138,6 @@ void GameScene::Update() {
 
 	stage_->Update();
 
-	for (EnemyBase* enemy : enemies_) {
-		if (enemy != nullptr && enemy->IsAlive()) {
-			enemy->Update();
-		}
-	}
 	//========================================
 	// パーティクル更新
 	//========================================
@@ -188,10 +204,15 @@ void GameScene::Draw() {
 	// 3Dモデル描画前処理
 	Model::PreDraw();
 
-	//オブジェクトを共通の型で描画
-	for (GameObject* object : gameObjects_) {
-	
-		object->Draw(camera_);
+	// プレイヤー描画
+	player_->Draw(camera_);
+
+	// 敵をまとめて描画
+	for (EnemyBase* enemy : enemies_) {
+
+		if (enemy != nullptr && enemy->IsAlive()) {
+			enemy->Draw(camera_);
+		}
 	}
 
 	// ステージ

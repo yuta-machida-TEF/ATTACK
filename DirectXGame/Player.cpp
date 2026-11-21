@@ -422,18 +422,11 @@ void Player::Update(Stage* stage, const std::vector<EnemyBase*>& enemies) {
 		// ========================================================
 		// ⑦ 敵との当たり判定
 		// ========================================================
-		if (enemy != nullptr && enemy->IsAlive()) {
-			CheckEnemyCollision(enemy->GetWorldTransform(), enemy->GetSize(), previousPosition, enemy);
-		}
-
-		// ========================================================
-		// Enemy2との当たり判定
-		// ========================================================
-
-		if (enemy != nullptr && enemy->IsAlive()) {
-
-			CheckEnemyCollision(enemy->GetWorldTransform(), enemy->GetSize(), previousPosition, enemy);
-		}
+		CheckEnemyCollision(
+			enemy->GetWorldTransform(),
+			enemy->GetSize(),
+			previousPosition,
+			enemy);
 	}
 
 

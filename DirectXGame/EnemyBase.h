@@ -14,7 +14,7 @@ public:
 	virtual void Update();
 
 	// 描画
-	void Draw(KamataEngine::Camera& camera) override;
+	virtual void Draw(KamataEngine::Camera& camera) override;
 
 	// ワールド変換取得
 	const KamataEngine::WorldTransform& GetWorldTransform() const override { return worldTransform_; }
