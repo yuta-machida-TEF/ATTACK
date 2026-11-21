@@ -120,6 +120,7 @@ void GameScene::Update() {
 			enemy->Update();
 		}
 
+
 		// 敵が倒された瞬間
 		if (previousEnemyAlive_[i] && !enemy->IsAlive()) {
 
