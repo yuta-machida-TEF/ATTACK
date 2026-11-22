@@ -4,11 +4,21 @@
 #include "GameObject.h"
 #include "Stage.h"
 #include <KamataEngine.h>
+#include"PlayerState.h"
+#include<memory>
 
 using namespace KamataEngine;
 
 class Enemy;
 class Enemy2;
+class PlayerState;
+
+//Stateクラスの前方宣言
+class PlayerIdleState;
+class PlayerMoveState;
+class PlayerJumpState;
+class PlayerDeadState;
+
 
 class Player : public GameObject {
 public:
@@ -32,6 +42,12 @@ public:
 
 	// ワールド変換を取得
 	const WorldTransform& GetWorldTransform() const override { return worldTransform_; }
+
+	 // 現在の状態を変更する
+	void ChangeState(std::unique_ptr<PlayerState> newState);
+
+	// 生存判定
+	bool IsAlive() const { return isAlive_; }
 
 private:
 	// =========================
@@ -70,4 +86,17 @@ private:
 
 	// ワールド変換
 	WorldTransform worldTransform_;
+
+	// 現在の状態
+	std::unique_ptr<PlayerState> state_;
+
+	// 次の状態
+	std::unique_ptr<PlayerState> nextState_;
+
+	// 状態クラスからPlayerの内部データを利用する
+	friend class PlayerGroundedState;
+	friend class PlayerJumpState;
+	friend class PlayerDeadState;
+
+	void UpdateHorizontalMove();
 };

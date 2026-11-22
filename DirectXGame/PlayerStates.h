@@ -2,15 +2,8 @@
 
 #include "PlayerState.h"
 
-
-// 待機状態
-class PlayerIdleState : public PlayerState {
-public:
-	void Update(Player& player) override;
-};
-
-// 移動状態
-class PlayerMoveState : public PlayerState {
+// 地上状態
+class PlayerGroundedState : public PlayerState {
 public:
 	void Update(Player& player) override;
 };
@@ -18,7 +11,6 @@ public:
 // ジャンプ状態
 class PlayerJumpState : public PlayerState {
 public:
-	void Enter(Player& player) override;
 	void Update(Player& player) override;
 };
 
