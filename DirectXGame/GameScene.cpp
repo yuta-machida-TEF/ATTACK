@@ -21,13 +21,6 @@ GameScene::~GameScene() {
 	enemies_.clear();
 	gameObjects_.clear();
 
-	// パーティクルの解放
-	for (Particle* particle : particles_) {
-		delete particle;
-	}
-
-	particles_.clear();
-
 	// 3Dモデルの解放
 	delete modelPlayer_;
 	delete modelEnemy_;
@@ -86,6 +79,9 @@ void GameScene::Initialize() {
 
 	// ポリモーフィズムによるオブジェクト管理
 	gameObjects_.push_back(player_);
+
+	particlePool_.Initialize(modelParticle_, 24);
+
 }
 
 // 更新
@@ -122,42 +118,20 @@ void GameScene::Update() {
 		previousEnemyAlive_[i] = enemy->IsAlive();
 	}
 
+	//パーティクル更新
+	particlePool_.Update();
+
 	//========================================
 	// その他の更新
 	//========================================
 
 	stage_->Update();
 
-	//========================================
-	// パーティクル更新
-	//========================================
-
-	for (Particle* particle : particles_) {
-		particle->Update();
-	}
-
-	//========================================
-	// 終了したパーティクルを削除
-	//========================================
-
-	particles_.erase(
-	    std::remove_if(
-	        particles_.begin(), particles_.end(),
-	        [](Particle* particle) {
-		        if (particle->IsFinished()) {
-
-			        delete particle;
-
-			        return true;
-		        }
-
-		        return false;
-	        }),
-	    particles_.end());
 }
 
 // パーティクル生成
-void GameScene::CreateParticles(const KamataEngine::Vector3& position) {
+
+void GameScene::CreateParticles(const Vector3& position) {
 
 	const int particleCount = 12;
 
@@ -165,17 +139,20 @@ void GameScene::CreateParticles(const KamataEngine::Vector3& position) {
 
 	for (int i = 0; i < particleCount; i++) {
 
-		Particle* particle = new Particle();
-
 		const float angle = 2.0f * std::numbers::pi_v<float> * static_cast<float>(i) / static_cast<float>(particleCount);
 
 		Vector3 velocity = {std::cos(angle) * speed, std::sin(angle) * speed + 0.05f, 0.0f};
 
-		particle->Initialize(modelParticle_, position, velocity);
+		// プールからパーティクルを取得
+		Particle* particle = particlePool_.Acquire(position, velocity);
 
-		particles_.push_back(particle);
+		// 取得できなかった場合
+		if (particle == nullptr) {
+			continue;
+		}
 	}
 }
+
 
 // 描画
 void GameScene::Draw() {
@@ -208,10 +185,8 @@ void GameScene::Draw() {
 	// ステージ
 	stage_->Draw(camera_);
 
-	// パーティクル
-	for (Particle* particle : particles_) {
-		particle->Draw(camera_);
-	}
+	//パーティクル描画
+	particlePool_.Draw(camera_);
 
 	// 3Dモデル描画後処理
 	Model::PostDraw();
