@@ -1,10 +1,10 @@
 #pragma once
 #include "Enemy.h"
 #include "Enemy2.h"
+#include "GameObject.h"
 #include "Particle.h"
 #include "Player.h"
 #include "Stage.h"
-#include"GameObject.h"
 
 #include <KamataEngine.h>
 #include <vector>
@@ -40,10 +40,27 @@ private:
 	// オブジェクト
 	// =========================
 
+	//=========================
+	// 敵
+	// ========================
+	// 敵をまとめて管理する配列
+	std::vector<EnemyBase*> enemies_;
+
+	// 描画するオブジェクトをまとめる
+	// ポリモーフィズムで管理するオブジェクト
+	std::vector<GameObject*> gameObjects_;
+
+	//=======================
+	// プレイヤー
+	//=======================
 	Player* player_ = nullptr;
-	Enemy* enemy_ = nullptr;
-	Enemy2* enemy2_ = nullptr;
+	//=======================
+	// ステージ
+	//=======================
 	Stage* stage_ = nullptr;
+	//=======================
+	// パーティクル
+	//=======================
 	Particle* particle_ = nullptr;
 
 	// =========================
@@ -51,11 +68,6 @@ private:
 	// =========================
 
 	Camera camera_;
-
-	Camera camera2_; // 追従カメラ
-
-	// false : 既存カメラ、true : 追従カメラ
-	bool isCamera2_ = false;
 
 	// =========================
 	// 内部処理用の変数
@@ -65,16 +77,13 @@ private:
 
 	Vector3 previousPosition = {-15.0f, 8.0f, 0.0f};
 
-	bool enemyWasAlive_ = true;
-	bool enemy2WasAlive_ = true;
+	std::vector<bool> previousEnemyAlive_;
 
 	// =========================
 	// パーティクル
 	// =========================
 
 	std::vector<Particle*> particles_;
-	//ポリモーフィズムで管理するオブジェクト
-	std::vector<GameObject*> gameObjects_;
 
 	// =========================
 	// 内部処理用関数

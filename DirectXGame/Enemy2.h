@@ -5,10 +5,9 @@
 
 class Enemy2 : public EnemyBase {
 public:
-	//Kill()、IsAlive()、GetWorldTransform()、GetSize() は親クラスから引き継ぐため、
-	//Enemy.hに書く必要がありません。
+	void Initialize(KamataEngine::Model* model, KamataEngine::Vector3 position) override;
 
+	void Update() override;
 
-	void Initialize(KamataEngine::Model* model);
-
+	void Draw(KamataEngine::Camera& camera) override;
 };

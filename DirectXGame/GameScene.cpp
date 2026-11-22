@@ -1,7 +1,7 @@
 #include "GameScene.h"
 #include <algorithm>
-#include<numbers>
-#include<cmath>
+#include <cmath>
+#include <numbers>
 
 using namespace KamataEngine;
 
@@ -10,9 +10,16 @@ GameScene::~GameScene() {
 
 	// オブジェクトの解放
 	delete player_;
-	delete enemy_;
-	delete enemy2_;
 	delete stage_;
+
+	// 敵のメモリ解放
+	for (EnemyBase* enemy : enemies_) {
+		delete enemy;
+	}
+
+	// enemiesだけでは、、敵のインスタンスのメモリが解放されません。
+	enemies_.clear();
+	gameObjects_.clear();
 
 	// パーティクルの解放
 	for (Particle* particle : particles_) {
@@ -29,8 +36,7 @@ GameScene::~GameScene() {
 	delete modelParticle_;
 }
 // 初期化
-void GameScene::Initialize() 
-{
+void GameScene::Initialize() {
 
 	// 3Dモデルの生成
 	modelPlayer_ = Model::CreateFromOBJ("player");
@@ -42,104 +48,85 @@ void GameScene::Initialize()
 	modelParticle_ = Model::CreateFromOBJ("deathParticle");
 	assert(modelParticle_);
 
-
 	// カメラの初期化
 	camera_.translation_ = {0, 0, -20};
 	camera_.Initialize();
 
-	// 追従カメラの初期化
-	camera2_.translation_ = {0.0f, 5.0f, -20.0f};
-	camera2_.Initialize();
-
 	player_ = new Player();
 	player_->Initialize(modelPlayer_);
 
-	enemy_ = new Enemy();
-	enemy_->Initialize(modelEnemy_);
+	// イメージとしては、
+	// クラス：設計図
+	// ポリモーフィズムを使って敵を一括管理する
+	//================================
+	// Enemy
+	//================================
+	// push_backのメンバ関数の役割は、配列の最後に要素を追加する。
+	enemies_.push_back(new Enemy());
 
-	enemy2_ = new Enemy2();
-	enemy2_->Initialize(modelEnemy2_);
+	// backのメンバ関数の役割は、配列の最後にある要素を取得する。
+	enemies_.back()->Initialize(modelEnemy_, {10.0f, -3.0f, 0.0f});
 
+	//======================
+	// Enemy2
+	//======================
+	enemies_.push_back(new Enemy2());
+
+	enemies_.back()->Initialize(modelEnemy2_, {5.0f, -3.0f, 0.0f});
+
+	for (EnemyBase* enemy : enemies_) {
+		previousEnemyAlive_.push_back(enemy->IsAlive());
+	}
+
+	//===============
+	// ステージ
+	//===============
 	stage_ = new Stage();
 	stage_->Initialize(modelBlock_);
 
-    // ポリモーフィズムによるオブジェクト管理
+	// ポリモーフィズムによるオブジェクト管理
 	gameObjects_.push_back(player_);
-	gameObjects_.push_back(enemy_);
-	gameObjects_.push_back(enemy2_);
-
 }
 
 // 更新
 void GameScene::Update() {
 
-	 Input* input = Input::GetInstance();
-
-	// Cキーを押した瞬間に切り替える
-	if (input->TriggerKey(DIK_C)) {
-		isCamera2_ = !isCamera2_;
-	}
-
 	// プレイヤー更新
-	player_->Update(stage_, enemy_, enemy2_);
+	player_->Update(stage_, enemies_);
 
-	// 追従カメラを更新
-	if (isCamera2_) {
+	//====================
+	// 敵の更新・死亡判定
+	//====================
+	for (size_t i = 0; i < enemies_.size(); i++) {
 
-		// プレイヤーの現在位置を取得
-		const Vector3& playerPosition = player_->GetWorldTransform().translation_;
+		EnemyBase* enemy = enemies_[i];
 
-		// カメラがプレイヤーを追いかける位置
-		const float followSpeed = 0.1f;
+		if (enemy == nullptr) {
+			continue;
+		}
 
-		camera2_.translation_.x += (playerPosition.x - camera2_.translation_.x) * followSpeed;
+		// 敵の更新
+		if (enemy->IsAlive()) {
+			enemy->Update();
+		}
 
-		camera2_.translation_.y += (playerPosition.y - camera2_.translation_.y) * followSpeed;
+		// 敵が倒された瞬間
+		if (previousEnemyAlive_[i] && !enemy->IsAlive()) {
 
-		// Z座標は固定して、前後の距離を維持
-		camera2_.translation_.z = -20.0f;
+			Vector3 position = enemy->GetWorldTransform().translation_;
+
+			CreateParticles(position);
+		}
+
+		// 生存状態を保存
+		previousEnemyAlive_[i] = enemy->IsAlive();
 	}
-
-	// カメラの行列を更新
-	camera2_.UpdateMatrix();
-
-	//========================================
-	// 敵1が倒された瞬間
-	//========================================
-
-	if (enemyWasAlive_ && !enemy_->IsAlive()) {
-
-		Vector3 position = enemy_->GetWorldTransform().translation_;
-
-		CreateParticles(position);
-	}
-
-	// 現在の敵1の生存状態を保存
-	enemyWasAlive_ = enemy_->IsAlive();
-
-	//========================================
-	// 敵2が倒された瞬間
-	//========================================
-
-	if (enemy2WasAlive_ && !enemy2_->IsAlive()) {
-
-		Vector3 position = enemy2_->GetWorldTransform().translation_;
-
-		CreateParticles(position);
-	}
-
-	// 現在の敵2の生存状態を保存
-	enemy2WasAlive_ = enemy2_->IsAlive();
 
 	//========================================
 	// その他の更新
 	//========================================
 
 	stage_->Update();
-
-	enemy_->Update();
-
-	enemy2_->Update();
 
 	//========================================
 	// パーティクル更新
@@ -207,21 +194,23 @@ void GameScene::Draw() {
 	// 3Dモデル描画前処理
 	Model::PreDraw();
 
-	// 使用するカメラを選択
-	Camera& activeCamera = isCamera2_ ? camera2_ : camera_;
+	// プレイヤー描画
+	player_->Draw(camera_);
 
-	//オブジェクトを共通の型で描画
-	for (GameObject* object : gameObjects_) {
-	
-		object->Draw(activeCamera);
+	// 敵をまとめて描画
+	for (EnemyBase* enemy : enemies_) {
+
+		if (enemy != nullptr && enemy->IsAlive()) {
+			enemy->Draw(camera_);
+		}
 	}
 
 	// ステージ
-	stage_->Draw(activeCamera);
+	stage_->Draw(camera_);
 
 	// パーティクル
 	for (Particle* particle : particles_) {
-		particle->Draw(activeCamera);
+		particle->Draw(camera_);
 	}
 
 	// 3Dモデル描画後処理

@@ -1,68 +1,73 @@
-
 #pragma once
 
 #include "EnemyBase.h"
 #include "GameObject.h"
 #include "Stage.h"
-
 #include <KamataEngine.h>
-#include <memory>
 
-class PlayerState;
-class PlayerIdleState;
-class PlayerMoveState;
-class PlayerJumpState;
-class PlayerDeadState;
+using namespace KamataEngine;
+
+class Enemy;
+class Enemy2;
 
 class Player : public GameObject {
 public:
+	// デストラクタ
 	~Player();
 
-	void Initialize(KamataEngine::Model* model);
+	// 初期化
+	void Initialize(Model* model);
 
-	void Update(Stage* stage, EnemyBase* enemy, EnemyBase* enemy2);
+	// 更新
+	void Update(Stage* stage, const std::vector<EnemyBase*>& enemies);
 
+	// 描画
 	void Draw(KamataEngine::Camera& camera) override;
 
-	bool CheckCollision(const KamataEngine::WorldTransform& platform, const KamataEngine::Vector3& platformSize, const KamataEngine::Vector3& previousPosition);
+	// 衝突判定
+	bool CheckCollision(const WorldTransform& platform, const Vector3& platformSize, const Vector3& previousPosition);
 
-	bool CheckEnemyCollision(const KamataEngine::WorldTransform& enemyTransform, const KamataEngine::Vector3& enemySize, const KamataEngine::Vector3& previousPosition, EnemyBase* enemyObject);
+	// Enemy・Enemy2共通の当たり判定
+	bool CheckEnemyCollision(const WorldTransform& enemyTransform, const Vector3& enemySize, const Vector3& previousPosition, EnemyBase* enemyObject);
 
-	const KamataEngine::WorldTransform& GetWorldTransform() const override { return worldTransform_; }
-
-	// 状態変更
-	void ChangeState(std::unique_ptr<PlayerState> newState);
+	// ワールド変換を取得
+	const WorldTransform& GetWorldTransform() const override { return worldTransform_; }
 
 private:
-	// 各StateクラスからPlayerのメンバ変数を利用する
-	friend class PlayerIdleState;
-	friend class PlayerMoveState;
-	friend class PlayerJumpState;
-	friend class PlayerDeadState;
+	// =========================
+	// メンバ変数
+	// =========================
 
-	void Move();
+	// モデル
+	Model* model_ = nullptr;
 
-	std::unique_ptr<PlayerState> state_;
+	// 落下速度
+	Vector2 velocity_ = {0.0f, 0.0f};
 
-	KamataEngine::Model* model_ = nullptr;
-
-	KamataEngine::Vector2 velocity_ = {0.0f, 0.0f};
-
+	// 重力
 	const float gravity_ = -0.020f;
 
+	// 地面にいるか
 	bool isGround_ = true;
 
-	const float groundY_ = -7.0f;
+	// 地面の高さ
+	const float groundY = -7.0f;
 
+	// 前フレームの位置
 	float previousBottom_ = 0.0f;
 
+	// ジャンプ力
 	const float jumpPower_ = 0.38f;
 
+	// 移動速度
 	const float moveSpeed_ = 0.20f;
 
+	// 左右の移動方向
 	float previousMoveDirection_ = 0.0f;
 
+	// プレイヤーが生きているか
 	bool isAlive_ = true;
 
-	KamataEngine::WorldTransform worldTransform_;
+	// ワールド変換
+	WorldTransform worldTransform_;
 };
