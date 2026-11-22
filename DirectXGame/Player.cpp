@@ -195,10 +195,6 @@ bool Player::CheckCollision(const KamataEngine::WorldTransform& platform, const 
 }
 
 //============================================================
-// 敵の当たり判定
-//============================================================
-
-//============================================================
 // Enemy・Enemy2共通の当たり判定
 //============================================================
 bool Player::CheckEnemyCollision(const WorldTransform& enemyTransform, const Vector3& enemySize, const Vector3& previousPosition, EnemyBase* enemyObject) {
