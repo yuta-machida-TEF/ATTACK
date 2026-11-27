@@ -1,7 +1,7 @@
 #include "GameScene.h"
 #include <algorithm>
-#include<numbers>
-#include<cmath>
+#include <cmath>
+#include <numbers>
 
 using namespace KamataEngine;
 
@@ -17,7 +17,7 @@ GameScene::~GameScene() {
 		delete enemy;
 	}
 
-	//enemiesだけでは、、敵のインスタンスのメモリが解放されません。
+	// enemiesだけでは、、敵のインスタンスのメモリが解放されません。
 	enemies_.clear();
 	gameObjects_.clear();
 
@@ -36,8 +36,7 @@ GameScene::~GameScene() {
 	delete modelParticle_;
 }
 // 初期化
-void GameScene::Initialize() 
-{
+void GameScene::Initialize() {
 
 	// 3Dモデルの生成
 	modelPlayer_ = Model::CreateFromOBJ("player");
@@ -48,7 +47,6 @@ void GameScene::Initialize()
 	// パーティクル用モデル
 	modelParticle_ = Model::CreateFromOBJ("deathParticle");
 	assert(modelParticle_);
-
 
 	// カメラの初期化
 	camera_.translation_ = {0, 0, -20};
@@ -61,48 +59,48 @@ void GameScene::Initialize()
 	// クラス：設計図
 	// ポリモーフィズムを使って敵を一括管理する
 	//================================
-	//Enemy
+	// Enemy
 	//================================
-	//push_backのメンバ関数の役割は、配列の最後に要素を追加する。
-	enemies_.push_back(new Enemy());
+	// push_backのメンバ関数の役割は、配列の最後に要素を追加する。
+	Enemy* enemy = new Enemy();
 
-    //backのメンバ関数の役割は、配列の最後にある要素を取得する。
-	enemies_.back()->Initialize(
-		modelEnemy_, 
-	    {10.0f, -3.0f, 0.0f}
-	);
+	enemy->Initialize(modelEnemy_,{10.0f, -3.0f, 0.0f});
+
+	// backのメンバ関数の役割は、配列の最後にある要素を取得する。
+	enemies_.push_back(enemy);
 
 	//======================
 	// Enemy2
 	//======================
-	enemies_.push_back(new Enemy2());
 
-	enemies_.back()->Initialize(
-		modelEnemy2_,
-		{5.0f, -3.0f, 0.0f}
-	);
+	// Enemy2
+	Enemy2* enemy2 = new Enemy2();
 
+	// 初期化
+	enemy2->Initialize(modelEnemy2_, {5.0f, -3.0f, 0.0f});
 
-	for (EnemyBase* enemy : enemies_) {
-		previousEnemyAlive_.push_back(enemy->IsAlive());
+	// 配列に追加
+	enemies_.push_back(enemy2);
+
+	for (EnemyBase* enemyBase : enemies_) {
+		previousEnemyAlive_.push_back(enemyBase->IsAlive());
 	}
 
 	//===============
-	//ステージ
+	// ステージ
 	//===============
 	stage_ = new Stage();
 	stage_->Initialize(modelBlock_);
 
-    // ポリモーフィズムによるオブジェクト管理
+	// ポリモーフィズムによるオブジェクト管理
 	gameObjects_.push_back(player_);
-
 }
 
 // 更新
 void GameScene::Update() {
 
 	// プレイヤー更新
-	player_->Update(stage_,enemies_);
+	player_->Update(stage_, enemies_);
 
 	//====================
 	// 敵の更新・死亡判定
@@ -119,7 +117,6 @@ void GameScene::Update() {
 		if (enemy->IsAlive()) {
 			enemy->Update();
 		}
-
 
 		// 敵が倒された瞬間
 		if (previousEnemyAlive_[i] && !enemy->IsAlive()) {

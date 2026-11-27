@@ -2,7 +2,7 @@
 
 using namespace KamataEngine;
 
-void Enemy::Initialize(Model* model, Vector3 position) {
+void Enemy::Initialize(KamataEngine::Model* model, KamataEngine::Vector3 position) {
 
 	// 基底クラスの初期化を利用
 	EnemyBase::Initialize(model, position);
@@ -45,4 +45,4 @@ void Enemy::Update() {
 	worldTransform_.UpdateMatrix();
 }
 
-void Enemy::Draw(Camera& camera) { EnemyBase::Draw(camera); }
+void Enemy::Draw(KamataEngine::Camera& camera) { EnemyBase::Draw(camera); }

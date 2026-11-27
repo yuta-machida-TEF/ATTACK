@@ -1,11 +1,11 @@
 #pragma once
-#include "Enemy.h"
-#include "Enemy2.h"
 #include "Particle.h"
 #include "Player.h"
 #include "Stage.h"
 #include"GameObject.h"
-
+#include"Enemy.h"
+#include"Enemy2.h"
+#include"EnemyBase.h"
 #include <KamataEngine.h>
 #include <vector>
 
@@ -45,6 +45,8 @@ private:
 	// ========================
 	 // 敵をまとめて管理する配列
 	std::vector<EnemyBase*> enemies_;
+
+
 
 	// 描画するオブジェクトをまとめる
 	// ポリモーフィズムで管理するオブジェクト

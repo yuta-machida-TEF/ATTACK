@@ -1,17 +1,14 @@
 #include "Player.h"
-#include"EnemyBase.h"
+#include "EnemyBase.h"
 
 #include <math/MathUtility.h>
-#include<numbers>
+#include <numbers>
 
 using namespace KamataEngine;
 using namespace MathUtility;
 
-//GameScene側でパーティクルの生成と描画、削除を管理している
-Player::~Player()
-{
-	
-}
+// GameScene側でパーティクルの生成と描画、削除を管理している
+Player::~Player() {}
 
 // 初期化
 void Player::Initialize(Model* model) {
@@ -24,7 +21,6 @@ void Player::Initialize(Model* model) {
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
 
 	worldTransform_.translation_ = {-12.0f, -6.5f, 0.0f};
-
 }
 
 // ============================================================
@@ -129,8 +125,6 @@ bool Player::CheckCollision(const KamataEngine::WorldTransform& platform, const 
 
 		velocity_.y = 0.0f;
 
-		
-
 		isGround_ = true;
 
 		return true;
@@ -196,36 +190,20 @@ bool Player::CheckCollision(const KamataEngine::WorldTransform& platform, const 
 	return false;
 }
 
-
 //============================================================
-//敵の当たり判定
+// 敵の当たり判定
 //============================================================
 
 //============================================================
 // Enemy・Enemy2共通の当たり判定
 //============================================================
-bool Player::CheckEnemyCollision(
-	const WorldTransform& enemyTransform,
-	const Vector3& enemySize,
-	const Vector3& previousPosition,
-	EnemyBase* enemyObject) {
+bool Player::CheckEnemyCollision(const WorldTransform& enemyTransform, const Vector3& enemySize, const Vector3& previousPosition, EnemyBase* enemyObject) {
 
 	//============================================================
 	// 敵が存在しない、または倒されている場合
 	//============================================================
 
 	if (enemyObject == nullptr || !enemyObject->IsAlive()) {
-		return false;
-	}
-
-	bool enemyAlive = false;
-
-	if (enemyObject != nullptr) 
-	{
-		enemyAlive = enemyObject->IsAlive();
-	} 
-
-	if (!enemyAlive) {
 		return false;
 	}
 
@@ -308,8 +286,7 @@ bool Player::CheckEnemyCollision(
 		velocity_.y = jumpPower_;
 
 		// 対象の敵を倒す
-	    enemyObject->Kill();
-		
+		enemyObject->Kill();
 
 		isGround_ = false;
 
@@ -348,13 +325,12 @@ void Player::Update(Stage* stage, const std::vector<EnemyBase*>& enemies) {
 
 	isGround_ = false;
 
-
 	// ========================================================
 	// ③ 左右移動・旋回
 	// ========================================================
 
-	    // 移動方向
-	    float moveDirection = 0.0f;
+	// 移動方向
+	float moveDirection = 0.0f;
 
 	if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
 		worldTransform_.translation_.x += moveSpeed_;
@@ -382,7 +358,6 @@ void Player::Update(Stage* stage, const std::vector<EnemyBase*>& enemies) {
 	if (moveDirection != 0.0f) {
 		previousMoveDirection_ = moveDirection;
 	}
-	
 
 	// ========================================================
 	// ④ ジャンプ入力だけ取得
@@ -407,13 +382,12 @@ void Player::Update(Stage* stage, const std::vector<EnemyBase*>& enemies) {
 
 			if (stage->GetMapData(y, x) == 1) {
 
-				CheckCollision(stage->GetWorldTransform(y, x),
-					stage->GetPlatformSize(), previousPosition);
+				CheckCollision(stage->GetWorldTransform(y, x), stage->GetPlatformSize(), previousPosition);
 			}
 		}
 	}
 
-	for (EnemyBase* enemy :enemies) {
+	for (EnemyBase* enemy : enemies) {
 
 		if (enemy == nullptr || !enemy->IsAlive()) {
 			continue;
@@ -422,13 +396,8 @@ void Player::Update(Stage* stage, const std::vector<EnemyBase*>& enemies) {
 		// ========================================================
 		// ⑦ 敵との当たり判定
 		// ========================================================
-		CheckEnemyCollision(
-			enemy->GetWorldTransform(),
-			enemy->GetSize(),
-			previousPosition,
-			enemy);
+		CheckEnemyCollision(enemy->GetWorldTransform(), enemy->GetSize(), previousPosition, enemy);
 	}
-
 
 	// ========================================================
 	// ⑦ ジャンプ
@@ -452,11 +421,10 @@ void Player::Update(Stage* stage, const std::vector<EnemyBase*>& enemies) {
 // 描画
 // ============================================================
 
-void Player::Draw(Camera& camera)
-{
-    if (!isAlive_) {
-        return;
-    }
+void Player::Draw(Camera& camera) {
+	if (!isAlive_) {
+		return;
+	}
 
-    model_->Draw(worldTransform_, camera);
+	model_->Draw(worldTransform_, camera);
 }

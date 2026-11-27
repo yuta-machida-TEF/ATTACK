@@ -8,16 +8,17 @@ public:
 	virtual ~EnemyBase() = default;
 
 	// 初期化
-	virtual void Initialize(KamataEngine::Model* model, KamataEngine::Vector3 position);
+	virtual void Initialize(KamataEngine::Model* model,
+		KamataEngine::Vector3 position) = 0;
 
 	// 更新
-	virtual void Update();
+	virtual void Update() = 0;
 
 	// 描画
-	virtual void Draw(KamataEngine::Camera& camera) override;
+	virtual void Draw(KamataEngine::Camera& camera) = 0;
 
 	// ワールド変換取得
-	const KamataEngine::WorldTransform& GetWorldTransform() const override { return worldTransform_; }
+	const KamataEngine::WorldTransform& GetWorldTransform() const { return worldTransform_; }
 
 	// 敵を倒す
 	void Kill();

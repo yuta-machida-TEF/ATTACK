@@ -11,7 +11,6 @@ public:
 	void Draw(KamataEngine::Camera& camera) override;
 
 private:
-
 	float jumpPower_ = 0.3f;
 	float gravity_ = -0.02f;
 

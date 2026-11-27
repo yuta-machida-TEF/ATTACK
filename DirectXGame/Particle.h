@@ -6,7 +6,7 @@ class Particle {
 public:
 	
 	// デスフラグのgetter
-	bool IsFinished() { return isFinished_; }
+	bool IsFinished() const{ return isFinished_; }
 
 	// 初期化
 	void Initialize(KamataEngine::Model* model, KamataEngine::Vector3 position, KamataEngine::Vector3 velocity);
