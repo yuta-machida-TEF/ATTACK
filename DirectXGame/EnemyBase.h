@@ -3,6 +3,7 @@
 #include "GameObject.h"
 #include <KamataEngine.h>
 
+//EnemyBaseがEnemy,Enemy2の親クラス
 class EnemyBase : public GameObject {
 public:
 	virtual ~EnemyBase() = default;
@@ -12,7 +13,7 @@ public:
 		KamataEngine::Vector3 position) = 0;
 
 	// 更新
-	virtual void Update() = 0;
+	virtual void Update()= 0;
 
 	// 描画
 	virtual void Draw(KamataEngine::Camera& camera) = 0;

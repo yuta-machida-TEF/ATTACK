@@ -4,7 +4,6 @@ using namespace KamataEngine;
 
 void Enemy::Initialize(KamataEngine::Model* model, KamataEngine::Vector3 position) {
 
-	// 基底クラスの初期化を利用
 	EnemyBase::Initialize(model, position);
 
 	velocityY_ = 0.0f;

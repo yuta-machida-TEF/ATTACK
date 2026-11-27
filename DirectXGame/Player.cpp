@@ -203,7 +203,7 @@ bool Player::CheckEnemyCollision(const WorldTransform& enemyTransform, const Vec
 	// 敵が存在しない、または倒されている場合
 	//============================================================
 
-	if (enemyObject == nullptr || !enemyObject->IsAlive()) {
+	if (enemyObject->IsAlive()) {
 		return false;
 	}
 

@@ -8,32 +8,22 @@ using namespace KamataEngine;
 // デストラクタ
 GameScene::~GameScene() {
 
-	// オブジェクトの解放
-	delete player_;
-	delete stage_;
-
 	// 敵のメモリ解放
 	for (EnemyBase* enemy : enemies_) {
 		delete enemy;
 	}
 
-	// enemiesだけでは、、敵のインスタンスのメモリが解放されません。
 	enemies_.clear();
-	gameObjects_.clear();
 
-	// パーティクルの解放
+	// その他のオブジェクトの解放
+	delete player_;
+	delete stage_;
+
 	for (Particle* particle : particles_) {
 		delete particle;
 	}
 
 	particles_.clear();
-
-	// 3Dモデルの解放
-	delete modelPlayer_;
-	delete modelEnemy_;
-	delete modelEnemy2_;
-	delete modelBlock_;
-	delete modelParticle_;
 }
 // 初期化
 void GameScene::Initialize() {
@@ -62,9 +52,9 @@ void GameScene::Initialize() {
 	// Enemy
 	//================================
 	// push_backのメンバ関数の役割は、配列の最後に要素を追加する。
-	Enemy* enemy = new Enemy();
+	EnemyBase* enemy = new Enemy();
 
-	enemy->Initialize(modelEnemy_,{10.0f, -3.0f, 0.0f});
+	enemy->Initialize(modelEnemy_,{5.0f, -3.0f, 0.0f});
 
 	// backのメンバ関数の役割は、配列の最後にある要素を取得する。
 	enemies_.push_back(enemy);
@@ -74,10 +64,10 @@ void GameScene::Initialize() {
 	//======================
 
 	// Enemy2
-	Enemy2* enemy2 = new Enemy2();
+	EnemyBase* enemy2 = new Enemy2();
 
 	// 初期化
-	enemy2->Initialize(modelEnemy2_, {5.0f, -3.0f, 0.0f});
+	enemy2->Initialize(modelEnemy2_, {10.0f, -3.0f, 0.0f});
 
 	// 配列に追加
 	enemies_.push_back(enemy2);
