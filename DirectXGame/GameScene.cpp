@@ -62,20 +62,28 @@ void GameScene::Initialize() {
 	// Enemy
 	//================================
 	// push_backのメンバ関数の役割は、配列の最後に要素を追加する。
-	enemies_.push_back(new Enemy());
+	Enemy* enemy = new Enemy();
+
+	enemy->Initialize(modelEnemy_, {10.0f, -3.0f, 0.0f});
 
 	// backのメンバ関数の役割は、配列の最後にある要素を取得する。
-	enemies_.back()->Initialize(modelEnemy_, {10.0f, -3.0f, 0.0f});
+	enemies_.push_back(enemy);
 
 	//======================
 	// Enemy2
 	//======================
-	enemies_.push_back(new Enemy2());
 
-	enemies_.back()->Initialize(modelEnemy2_, {5.0f, -3.0f, 0.0f});
+	// Enemy2
+	Enemy2* enemy2 = new Enemy2();
 
-	for (EnemyBase* enemy : enemies_) {
-		previousEnemyAlive_.push_back(enemy->IsAlive());
+	// 初期化
+	enemy2->Initialize(modelEnemy2_, {5.0f, -3.0f, 0.0f});
+
+	// 配列に追加
+	enemies_.push_back(enemy2);
+
+	for (EnemyBase* enemyBase : enemies_) {
+		previousEnemyAlive_.push_back(enemyBase->IsAlive());
 	}
 
 	//===============

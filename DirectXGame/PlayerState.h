@@ -3,6 +3,8 @@
 class Player;
 
 // 状態クラスの共通インターフェース
+//Playerの状態を管理するための基底クラス
+//PlayerStateがPlayerの動きの親クラスです
 class PlayerState {
 public:
 	virtual ~PlayerState() = default;

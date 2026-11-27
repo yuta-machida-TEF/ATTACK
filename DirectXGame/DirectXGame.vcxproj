@@ -171,6 +171,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PlayerMoveState.cpp" />
     <ClCompile Include="PlayerState.cpp" />
     <ClCompile Include="PlayerStates.cpp" />
     <ClCompile Include="Stage.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerMoveState.h" />
     <ClInclude Include="PlayerState.h" />
     <ClInclude Include="PlayerStates.h" />
     <ClInclude Include="Stage.h" />
